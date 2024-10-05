@@ -1,27 +1,25 @@
-name: Create Release Mediatek Filogic
+name: Create Release aarch64_generic
 #on: [push]
 on:
   push:
     tags:
       - "v*.*.*"
-
-jobs:
+jobs: 
   build:
-    name: "v${{ matrix.tag }} - ${{ matrix.build_env.pkgarch}} :: ${{ matrix.build_env.target}}/${{ matrix.build_env.subtarget}} build"
-    runs-on: Linux
-    #runs-on: ubuntu-latest
+    name: "${{ matrix.build_env.tag }} - ${{ matrix.build_env.pkgarch}} :: ${{ matrix.build_env.target}}/${{ matrix.build_env.subtarget}} build"
+    runs-on: ubuntu-latest
     strategy:
       matrix:
-        tag: ['23.05.5']
         build_env:
-          - pkgarch: aarch64_cortex-a53
-            target: mediatek
-            subtarget: filogic
+          - tag: "24.04_b202410041009"
+            pkgarch: aarch64_generic
+            target: rockchip
+            subtarget: armv8
     steps:
       - uses: actions/checkout@v4
         with:
-          repository: openwrt/openwrt
-          ref: v${{ matrix.tag }}
+          repository: x-wrt/x-wrt
+          ref: ${{ matrix.tag }}
           fetch-depth: 0
 
       - name: Update and install feeds for OpenWRT_v${{ matrix.tag }} ${{ matrix.build_env.target}}/${{ matrix.build_env.subtarget}}
@@ -29,20 +27,14 @@ jobs:
           pkgarch=${{ matrix.build_env.pkgarch}}
           target=${{ matrix.build_env.target}}
           subtarget=${{ matrix.build_env.subtarget}}
-
           echo "pkgarch: ${pkgarch}, target: ${target}, subtarget: ${subtarget}"
-
           rm -rf bin/packages/${pkgarch}/awgopenwrt/ || true
           rm -rf bin/targets/${target}/${subtarget}/packages/  || true
-
-          wget https://downloads.openwrt.org/releases/${{ matrix.tag }}/targets/${target}/${subtarget}/feeds.buildinfo -O feeds.conf
-
+          wget https://raw.githubusercontent.com/samara1532/x-wrt_my/refs/heads/master/feeds.conf.default -O feeds.conf
           echo "src-git awgopenwrt https://github.com/lolo6oT/awg-openwrt.git" >> ./feeds.conf
-
           ./scripts/feeds update -a
           ./scripts/feeds install -a
-
-          wget https://downloads.openwrt.org/releases/${{ matrix.tag }}/targets/${target}/${subtarget}/config.buildinfo -O .config
+          wget https://raw.githubusercontent.com/x-wrt/x-wrt/refs/tags/24.04_b202410041009/target/linux/rockchip/armv8/config-6.6 -O .config
 
           make defconfig
 
