@@ -27,13 +27,19 @@ jobs:
           pkgarch=${{ matrix.build_env.pkgarch}}
           target=${{ matrix.build_env.target}}
           subtarget=${{ matrix.build_env.subtarget}}
+          
           echo "pkgarch: ${pkgarch}, target: ${target}, subtarget: ${subtarget}"
+          
           rm -rf bin/packages/${pkgarch}/awgopenwrt/ || true
           rm -rf bin/targets/${target}/${subtarget}/packages/  || true
+          
           wget https://raw.githubusercontent.com/samara1532/x-wrt_my/refs/heads/master/feeds.conf.default -O feeds.conf
+          
           echo "src-git awgopenwrt https://github.com/lolo6oT/awg-openwrt.git" >> ./feeds.conf
+          
           ./scripts/feeds update -a
           ./scripts/feeds install -a
+          
           wget https://raw.githubusercontent.com/x-wrt/x-wrt/refs/tags/24.04_b202410041009/target/linux/rockchip/armv8/config-6.6 -O .config
 
           make defconfig
